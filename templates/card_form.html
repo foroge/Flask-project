@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Card Form</h1>
+<style>
+    .form-control-file {width: 50%;}
+</style>
+<form action="" method="post" id="card_form" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    <div align="center">
+        <p>
+            {{ form.title.label }}<br>
+            {{ form.title(class="form-control") }}
+            {% for error in form.title.errors %}
+                <p class="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.promt.label }}<br>
+            {{ form.promt(class="form-control") }}
+            {% for error in form.promt.errors %}
+                <p class="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </p>
+<!--        {% for image in files %}-->
+<!--         <img src="url_for('data', image)">-->
+<!--        {% endfor %}-->
+        <p>
+            {{ form.images.label }}<br>
+            {{ form.images(class="form-control-file", id="images") }}
+            {% for error in form.images.errors %}
+                <p class="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </p>
+        <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
+        {{message}}
+    </div>
+</form>
+<script>
+    document.getElementById("images").onchange = function() {myFunction()};
+
+    function myFunction() {
+        document.getElementById('card_form').submit();
+        alert("ok");
+
+    };
+</script>
+{% endblock %}

@@ -3,26 +3,73 @@ import sys
 
 from flask import Flask, render_template, redirect, request, make_response, jsonify, url_for
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
+from werkzeug.utils import secure_filename
 
 from forms.user import RegisterForm, LoginForm
+from forms.card import CardForm
 
 from data.user import User
+from data.cards import Card
 from data import db_session
 
+# from extra_utilities import json_save, save, name_change, save_card
 
-path = "\\".join(sys.argv[0].split("\\")[:-2])
-path = os.path.join(path, "templates")
-app = Flask(__name__, template_folder=path)
-del path
+
+PATH = "\\".join(sys.argv[0].split("\\")[:-2])
+
+path_templates = os.path.join(PATH, "templates")
+app = Flask(__name__, template_folder=path_templates)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 login_manager = LoginManager()
 login_manager.init_app(app)
 
 
+@app.route('/edit_card/<int:card_id>', methods=["GET", 'POST'])
+def edit_card(card_id):
+    form = CardForm()
+
+    if request.method == "GET":
+        db_sess = db_session.create_session()
+
+        card = db_sess.get(Card, card_id)
+        form.title.data = card.title
+        form.promt.data = card.promt
+
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+
+        card = Card()
+        card.user = current_user
+        card.title = form.title.data
+        card.promt = form.promt.data
+
+        path = os.path.join(PATH, f"cards/card_{card.id}")
+        for i, image in enumerate(form.images.data):
+            path_save = os.path.join(path, f"card_{i}")
+            image.save(path_save)
+
+        db_sess.add(card)
+        db_sess.commit()
+        db_sess.close()
+
+
+@app.route('/create_card', methods=["GET", 'POST'])
+def create_card():
+    form = CardForm()
+    if form.validate_on_submit():
+        if form.submit.data:
+            return save_card(form)
+        reload_card(form, 'card_form.html', title='Карточка')
+
+    return render_template('card_form.html', title='Карточка', form=form)
+
+
 @login_manager.user_loader
 def load_user(user_id):
     db_sess = db_session.create_session()
-    return db_sess.query(User).get(user_id)
+    user = db_sess.get(User, user_id)
+    db_sess.close()
+    return user
 
 
 @app.route('/logout')
@@ -36,7 +83,6 @@ def logout():
 @app.route('/index', methods=['GET', 'POST'])
 def index():
     return render_template('base.html', title='Индекс')
-
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -77,13 +123,12 @@ def reqister():
             return render_template('register.html', title='Регистрация',
                                    form=form,
                                    message="Такой пользователь уже есть")
-        user = User(
-            email=form.email.data,
-            hashed_password=form.password.data,
-            login=form.login.data,
-            age=form.age.data,
-        )
+        user = User()
+        user.email = form.email.data
         user.set_password(form.password.data)
+        user.login = form.login.data
+        user.age = form.age.data
+
         db_sess.add(user)
         db_sess.commit()
         db_sess.close()
@@ -92,9 +137,8 @@ def reqister():
 
 
 def main():
-    path = "\\".join(sys.argv[0].split("\\")[:-2])
-    path = os.path.join(path, "db/user.db")
-    db_session.global_init(path)
+    path_db = os.path.join(PATH, "db/user.db")
+    db_session.global_init(path_db)
     app.run(port=8080, host='127.0.0.1')
 
 

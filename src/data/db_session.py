@@ -1,9 +1,11 @@
 import sqlalchemy as sa
 import sqlalchemy.orm as orm
-from sqlalchemy.orm import Session
-import sqlalchemy.ext.declarative as dec
+from sqlalchemy.orm import Session, DeclarativeBase
 
-SqlAlchemyBase = dec.declarative_base()
+
+class SqlAlchemyBase(DeclarativeBase):
+    pass
+
 
 __factory = None
 
