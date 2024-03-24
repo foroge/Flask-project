@@ -10,4 +10,4 @@ class CardForm(FlaskForm):
     images = MultipleFileField(validators=[FileRequired(),
                                            FileAllowed(['jpg', 'png'], 'Images only!')])
 
-    submit = SubmitField('Create')
+    submit_btn = SubmitField('Create')

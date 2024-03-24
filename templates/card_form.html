@@ -4,7 +4,7 @@
 <style>
     .form-control-file {width: 50%;}
 </style>
-<form action="" method="post" id="card_form" enctype="multipart/form-data">
+<form action="/create_card" id="card-form" method="post" enctype="multipart/form-data">
     {{ form.hidden_tag() }}
     <div align="center">
         <p>
@@ -25,9 +25,7 @@
                 </p>
             {% endfor %}
         </p>
-<!--        {% for image in files %}-->
-<!--         <img src="url_for('data', image)">-->
-<!--        {% endfor %}-->
+            <img src="data/temp/card_1.jpg">
         <p>
             {{ form.images.label }}<br>
             {{ form.images(class="form-control-file", id="images") }}
@@ -37,17 +35,14 @@
                 </p>
             {% endfor %}
         </p>
-        <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
+        <p>{{ form.submit_btn(type="submit", class="btn btn-primary") }}</p>
         {{message}}
     </div>
 </form>
 <script>
-    document.getElementById("images").onchange = function() {myFunction()};
-
-    function myFunction() {
-        document.getElementById('card_form').submit();
-        alert("ok");
-
-    };
+    document.getElementById('images').addEventListener('change', function() {
+        console.log(document.getElementById("card-form"));
+        document.getElementById("card-form").submit();
+    });
 </script>
 {% endblock %}

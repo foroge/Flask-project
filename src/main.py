@@ -12,13 +12,13 @@ from data.user import User
 from data.cards import Card
 from data import db_session
 
-# from extra_utilities import json_save, save, name_change, save_card
+from extra_utilities import json_save, save, name_change, save_card, reload_card
 
 
 PATH = "\\".join(sys.argv[0].split("\\")[:-2])
 
-path_templates = os.path.join(PATH, "templates")
-app = Flask(__name__, template_folder=path_templates)
+path_templates = os.path.join(PATH, "templates", )
+app = Flask(__name__, template_folder=path_templates, static_folder="data")
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -56,11 +56,11 @@ def edit_card(card_id):
 @app.route('/create_card', methods=["GET", 'POST'])
 def create_card():
     form = CardForm()
-    if form.validate_on_submit():
-        if form.submit.data:
-            return save_card(form)
-        reload_card(form, 'card_form.html', title='Карточка')
 
+    if form.is_submitted() and not form.submit_btn.data:
+        return reload_card(form, 'card_form.html', title='Карточка')
+    elif form.validate_on_submit():
+        return save_card(form)
     return render_template('card_form.html', title='Карточка', form=form)
 
 

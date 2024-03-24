@@ -1,8 +1,10 @@
 import os
 import json
-from flask import render_template
-#
-#
+import sys
+
+from flask import render_template, url_for
+
+
 def json_save(file_path, path, data):
     pass
     # with open(file_path) as file:
@@ -21,13 +23,15 @@ def save(data: list, path: str, ret=False):
     paths = list()
     for i, file in enumerate(data):
         path_save = os.path.join(path, file.filename)
-        path.append(path_save)
+        paths.append(file.filename)
         file.save(path_save)
     if ret:
         return paths
 
 
 def save_card(form):
+    from main import PATH
+
     db_sess = db_session.create_session()
 
     card = Card()
@@ -48,10 +52,13 @@ def save_card(form):
 
 
 def reload_card(form, name, title):
+    from main import PATH
+
     path = os.path.join(PATH, f"data\\temp")
     data = name_change(form.images.data, "card")
     paths = save(data, path, ret=True)
     if paths:
-        return render_template(name, title=title, form=form, files=paths)
+        # path = url_for('static', filename='cards/card_0.png')
+        return render_template(name, title=title, form=form, files=paths, path=path)
     return render_template(name, title=title, form=form)
 
