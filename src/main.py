@@ -12,56 +12,38 @@ from data.user import User
 from data.cards import Card
 from data import db_session
 
-from extra_utilities import json_save, save, name_change, save_card, reload_card
+from extra_utilities import save, name_change, save_card, reload_card, load_card
 
 
 PATH = "\\".join(sys.argv[0].split("\\")[:-2])
 
-path_templates = os.path.join(PATH, "templates", )
-app = Flask(__name__, template_folder=path_templates, static_folder="data")
+path_templates = os.path.join(PATH, "templates")
+path_static = os.path.join(PATH, "data")
+app = Flask(__name__, template_folder=path_templates, static_folder=path_static)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 login_manager = LoginManager()
 login_manager.init_app(app)
 
 
 @app.route('/edit_card/<int:card_id>', methods=["GET", 'POST'])
-def edit_card(card_id):
+def edit_card(card_id: int):
     form = CardForm()
-
     if request.method == "GET":
-        db_sess = db_session.create_session()
-
-        card = db_sess.get(Card, card_id)
-        form.title.data = card.title
-        form.promt.data = card.promt
-
-    if form.validate_on_submit():
-        db_sess = db_session.create_session()
-
-        card = Card()
-        card.user = current_user
-        card.title = form.title.data
-        card.promt = form.promt.data
-
-        path = os.path.join(PATH, f"cards/card_{card.id}")
-        for i, image in enumerate(form.images.data):
-            path_save = os.path.join(path, f"card_{i}")
-            image.save(path_save)
-
-        db_sess.add(card)
-        db_sess.commit()
-        db_sess.close()
+        return load_card(form=form, name='card_form.html', title='Карточка', card_id=card_id)
+    if form.is_submitted() and not form.submit_btn.data:
+        return reload_card(form=form, name='card_form.html', title='Карточка')
+    elif form.validate_on_submit():
+        return save_card(form, mode="edit", card_id=card_id)
 
 
 @app.route('/create_card', methods=["GET", 'POST'])
 def create_card():
     form = CardForm()
-
     if form.is_submitted() and not form.submit_btn.data:
         return reload_card(form, 'card_form.html', title='Карточка')
     elif form.validate_on_submit():
-        return save_card(form)
-    return render_template('card_form.html', title='Карточка', form=form)
+        return save_card(form, mode="create")
+    return render_template('card_form.html', form=form, title='Карточка')
 
 
 @login_manager.user_loader

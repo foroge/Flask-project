@@ -4,7 +4,7 @@
 <style>
     .form-control-file {width: 50%;}
 </style>
-<form action="/create_card" id="card-form" method="post" enctype="multipart/form-data">
+<form action="" id="card-form" method="post" enctype="multipart/form-data">
     {{ form.hidden_tag() }}
     <div align="center">
         <p>
@@ -25,9 +25,25 @@
                 </p>
             {% endfor %}
         </p>
-        {% for image in files %}
-            <img src="{{ url_for('static', filename='temp/' + image) }}">
-        {% endfor %}
+        <div style="width: 45%; height: auto;">
+            <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    {% for image in files %}
+                        <div class="carousel-item {% if loop.first %}active{% endif %}" data-bs-interval="{% if loop.first %}5000{% else %}2000{% endif %}">
+                            <img src="{{ url_for('static', filename='temp/' + image) }}" class="d-block w-100" alt="Image {{ loop.index }}">
+                        </div>
+                    {% endfor %}
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+            </div>
+        </div>
         <p>
             {{ form.images.label }}<br>
             {{ form.images(class="form-control-file", id="images") }}

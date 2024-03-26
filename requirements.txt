@@ -1,4 +1,9 @@
 SQLAlchemy~=2.0.28
+sqlalchemy-serializer~=1.4.1
+
 werkzeug~=3.0.1
-flask-login~=0.6.3
 flask~=3.0.2
+flask-login~=0.6.3
+wtforms~=3.1.2
+Flask-WTF~=1.2.1
+
