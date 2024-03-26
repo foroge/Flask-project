@@ -58,7 +58,6 @@ def reload_card(form, name, title):
     data = name_change(form.images.data, "card")
     paths = save(data, path, ret=True)
     if paths:
-        # path = url_for('static', filename='cards/card_0.png')
-        return render_template(name, title=title, form=form, files=paths, path=path)
+        return render_template(name, title=title, form=form, files=paths)
     return render_template(name, title=title, form=form)
 

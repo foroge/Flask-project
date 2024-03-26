@@ -25,7 +25,9 @@
                 </p>
             {% endfor %}
         </p>
-            <img src="data/temp/card_1.jpg">
+        {% for image in files %}
+            <img src="{{ url_for('static', filename='temp/' + image) }}">
+        {% endfor %}
         <p>
             {{ form.images.label }}<br>
             {{ form.images(class="form-control-file", id="images") }}
