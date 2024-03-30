@@ -2,12 +2,46 @@ import os
 import json
 import sys
 import shutil
+from datetime import datetime, timedelta
 
 import flask
 from flask import render_template, url_for, redirect, Response
 from flask_wtf import FlaskForm
 
 from data.cards import Card
+from data.user import User
+
+
+def get_duration(then: datetime, now=datetime.now()) -> str:
+
+    duration = now - then
+    duration_in_s = duration.total_seconds()
+
+    def years() -> tuple[float, float]:
+        return divmod(duration_in_s, 31536000)
+
+    def days(sec=0) -> tuple[float, float]:
+        return divmod(sec if sec else duration_in_s, 86400)
+
+    def hours(sec=0) -> tuple[float, float]:
+        return divmod(sec if sec else duration_in_s, 3600)
+
+    def minutes(sec=0) -> tuple[float, float]:
+        return divmod(sec if sec else duration_in_s, 60)
+
+    def seconds(sec=0) -> tuple[float, float]:
+        return divmod(sec if sec else duration_in_s, 1)
+
+    def total_duration() -> str:
+        y: tuple = years()
+        d: tuple = days(y[1])
+        h: tuple = hours(d[1])
+        m: tuple = minutes(h[1])
+        s: tuple = seconds(m[1])
+
+        return (f"{int(y[0])} years, {int(d[0])} days, {int(h[0])} hours, "
+                f"{int(m[0])} minutes and {int(s[0])} seconds")
+    return total_duration()
 
 
 def name_change(data: list, name: str):
@@ -43,6 +77,15 @@ def save_card(form, mode: str, card_id=None) -> Response:
         card.promt = form.promt.data
 
         db_sess.commit()
+    else:
+        card = Card()
+        card.user = current_user
+        card.title = form.title.data
+        card.promt = form.promt.data
+        db_sess.add(card)
+        db_sess.commit()
+        db_sess.flush()
+        card_id = card.id
 
     db_sess.close()
 
@@ -102,7 +145,10 @@ def load_files(files_path: list) -> list:
 
 
 def delete_images(folder_path) -> None:
-    files = os.listdir(folder_path)
-    for file in files:
-        file_path = os.path.join(folder_path, file)
-        os.remove(file_path)
+    try:
+        files = os.listdir(folder_path)
+        for file in files:
+            file_path = os.path.join(folder_path, file)
+            os.remove(file_path)
+    except FileNotFoundError:
+        pass

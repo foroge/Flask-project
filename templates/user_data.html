@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div>
+    <h2>User data</h2>
+
+    <a href="/edit_user" class="btn btn-info">Изменить</a>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <td> Username </td>
+                <td>{{ user.login }}</td>
+            </tr>
+            <tr>
+                <td> Age </td>
+                <td>{{ user.age }}</td>
+            </tr>
+            <tr>
+                <td> Email </td>
+                <td>{{ user.email }}</td>
+            </tr>
+            <tr>
+                <td> User rating </td>
+                <td>{{ user.rating_user }}</td>
+            </tr>
+            <tr>
+                <td> Cards rating </td>
+                <td>{{ user.rating_card }}</td>
+            </tr>
+            <tr>
+                <td> Whole rating </td>
+                <td>{{ user.rating_whole }}</td>
+            </tr>
+            <tr>
+                <td> It's been since the account was created:</td>
+                <td>{{ user.create_date }}</td>
+            </tr>
+        </tbody>
+    </table>
+    <h3>Cards</h3>
+    <table class="table">
+        {% for card in cards %}
+            <tr>
+                <td align="right"><a class="btn btn-primary btn-lg" href="/edit_card/{{ card.id }}">{{ card.title }}</a></td>
+                <td align="left" width="50%">{{ card.rating }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

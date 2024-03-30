@@ -11,8 +11,8 @@ class Card(SqlAlchemyBase, SerializerMixin):
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
     title = sqlalchemy.Column(sqlalchemy.String)
     promt = sqlalchemy.Column(sqlalchemy.String)
-    rating = sqlalchemy.Column(sqlalchemy.Float)
+    rating = sqlalchemy.Column(sqlalchemy.Float, default=0)
     create_date = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now())
 
     user_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("users.id"))
-    user = orm.relationship('User')
+    user = orm.relationship('User', foreign_keys=[user_id])
