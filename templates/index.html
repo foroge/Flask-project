@@ -1,29 +1,12 @@
 {% extends "base.html" %}
+{% block navbar %}
+<a class="navbar-brand btn btn-success" href="/rating">Rating</a>
+{% endblock %}
 
 {% block content %}
-<h2>Top 10 users</h2>
 
-<div class="filters">
-    <a href="/index/rating_cards" class="btn btn-info">by card rating</a>
-    <a href="/index/rating_user" class="btn btn-info">by player rating</a>
-    <a href="/index/rating_whole" class="btn btn-info">by overall rating</a>
-</div>
+<h2>Start menu</h2>
+<a class="btn btn-success" href="/start_game">Start</a>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Username</th>
-            <th>Rating</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for user in top_users %}
-        <tr>
-            <td>{{ user.login }}</td>
-            <td>{{ user.rating }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
 
 {% endblock %}

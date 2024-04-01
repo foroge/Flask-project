@@ -68,7 +68,7 @@ def create_card() -> Response | str:
 @login_manager.user_loader
 def load_user(user_id: int) -> User:
     db_sess = db_session.create_session()
-    user: User = db_sess.get(User, user_id)
+    user = db_sess.get(User, user_id)
     db_sess.close()
     return user
 
@@ -80,11 +80,17 @@ def logout():
     return redirect("/")
 
 
+@app.route('/', methods=['GET', 'POST'])
+@app.route('/index', methods=['GET', 'POST'])
+def index():
+    return render_template('index.html')
+
+
 @app.route('/user_data')
 def user_data() -> str:
     db_sess = db_session.create_session()
 
-    user: User = db_sess.get(User, int(current_user.get_id()))
+    user = db_sess.get(User, int(current_user.get_id()))
     user.update()
 
     user_dict = user.__dict__
@@ -102,9 +108,8 @@ def user_data() -> str:
     return render_template("user_data.html", user=user_dict, cards=cards)
 
 
-@app.route('/', methods=['GET', 'POST'])
-@app.route('/index/<sort>', methods=['GET', 'POST'])
-def index(sort='rating_whole'):
+@app.route('/rating/<sort>', methods=['GET', 'POST'])
+def rating(sort='rating_whole'):
     db_sess = db_session.create_session()
     users: list
     if sort == 'rating_cards':
@@ -119,7 +124,7 @@ def index(sort='rating_whole'):
     for user in users:
         user.update()
     users = [dict(login=user.login, rating=getattr(user, rating)) for user in users]
-    return render_template('index.html', top_users=users)
+    return render_template('rating.html', top_users=users)
 
 
 @app.route('/edit_user/<int:user_id>', methods=['GET', 'POST'])

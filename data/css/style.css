@@ -1,4 +1,9 @@
 .content-right {
-    display: flex;
-    justify-content: flex-end;
+    float:right;
+}
+.content-left {
+    float:left;
+}
+.full-nav {
+    height:3rem;
 }

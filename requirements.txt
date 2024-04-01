@@ -1,6 +1,5 @@
 SQLAlchemy~=2.0.28
 sqlalchemy-serializer~=1.4.1
-
 werkzeug~=3.0.1
 flask~=3.0.2
 flask-login~=0.6.3
