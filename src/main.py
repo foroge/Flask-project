@@ -8,6 +8,7 @@ from werkzeug.utils import secure_filename
 
 from forms.user import RegisterForm, LoginForm
 from forms.card import CardForm
+from forms.game_characteristic import StartGameForm
 
 from data.user import User
 from data.cards import Card
@@ -24,6 +25,12 @@ app = Flask(__name__, template_folder=path_templates, static_folder=path_static)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 login_manager = LoginManager()
 login_manager.init_app(app)
+
+
+@app.route('/game', methods=["GET", 'POST'])
+def game():
+    ...
+
 
 
 @app.route('/delete_card/<int:card_id>', methods=["GET", 'POST'])
@@ -83,7 +90,10 @@ def logout():
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/index', methods=['GET', 'POST'])
 def index():
-    return render_template('index.html')
+    form = StartGameForm()
+    if form.is_submitted():
+        redirect("/game/")
+    return render_template("index.html", form=form)
 
 
 @app.route('/user_data')

@@ -3,7 +3,7 @@
 {% block content %}
 <div>
     <h2>User data</h2>
-    <a href="/edit_user" class="btn btn-info">Изменить</a>
+    <a href="/edit_user" class="btn btn-outline-info">Изменить</a>
     <table class="table">
         <tbody>
             <tr>
@@ -40,7 +40,7 @@
     <table class="table">
         {% for card in cards %}
             <tr>
-                <td align="right"><a class="btn btn-primary btn-lg" href="/edit_card/{{ card.id }}">{{ card.title }}</a></td>
+                <td align="right"><a class="btn btn-outline-primary btn-lg" href="/edit_card/{{ card.id }}">{{ card.title }}</a></td>
                 <td align="left" width="50%">{{ card.rating }}</td>
             </tr>
         {% endfor %}
