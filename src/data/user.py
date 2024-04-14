@@ -1,10 +1,13 @@
 import datetime
 import sqlalchemy
+
 from data.db_session import SqlAlchemyBase
 from sqlalchemy import orm
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from sqlalchemy_serializer import SerializerMixin
+
+from .cards import ComplitedCard
 
 
 class User(SqlAlchemyBase, UserMixin, SerializerMixin):
@@ -21,6 +24,9 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     create_date = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now())
 
     cards = orm.relationship("Card", back_populates='user')
+
+    complited_cards = orm.relationship('Card', secondary=ComplitedCard, back_populates='user',
+                                       overlaps="finished_users")
 
     def set_password(self, password: str) -> None:
         self.hashed_password = generate_password_hash(password)

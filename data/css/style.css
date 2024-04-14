@@ -4,6 +4,20 @@
 .content-left {
     float:left;
 }
+.content-center {
+    text-align: center;
+}
+.border-none {
+  border-collapse: collapse;
+  border: none;
+}
+.wid-hei {
+    width:100%;
+    height:auto;
+}
 .full-nav {
     height:3rem;
+}
+.card {
+    display: block;
 }

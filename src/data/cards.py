@@ -4,6 +4,15 @@ from data.db_session import SqlAlchemyBase
 from sqlalchemy import orm
 from sqlalchemy_serializer import SerializerMixin
 
+ComplitedCard = sqlalchemy.Table('ComplitedCard',
+                                 SqlAlchemyBase.metadata,
+                                 sqlalchemy.Column('id', sqlalchemy.Integer, primary_key=True),
+                                 sqlalchemy.Column('finished_user_id', sqlalchemy.Integer,
+                                                   sqlalchemy.ForeignKey('cards.id')),
+                                 sqlalchemy.Column('complited_card_id', sqlalchemy.Integer,
+                                                   sqlalchemy.ForeignKey('users.id'))
+                                 )
+
 
 class Card(SqlAlchemyBase, SerializerMixin):
     __tablename__ = 'cards'
@@ -16,3 +25,5 @@ class Card(SqlAlchemyBase, SerializerMixin):
 
     user_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("users.id"))
     user = orm.relationship('User', foreign_keys=[user_id])
+
+    finished_users = orm.relationship("User", secondary=ComplitedCard)

@@ -1,18 +1,75 @@
 {% extends "base.html" %}
 {% block content %}
-    <h1>Index</h1>
-    <form action="" method="post">
-        {{ form.hidden_tag() }}
-        <p>
-            {{ form.question.label }}<br>
-            {{ form.question(class="form-control") }}<br>
-            {% for error in form.question.errors %}
-                <div class="alert alert-danger" role="alert">
-                    {{ error }}
+    <style>
+    table, tr, td {
+        border: none;
+    }
+    </style>
+    <h1>{{ title }}</h1>
+    <div>
+        {% if data %}
+        <div align="center">
+            <table class="table border-none">
+                <tr align="center"><td>Promt</td></tr>
+                <tr align="center"><td>{{ data['promt'] }}</td></tr>
+                <tr align="center"><td>Answer</td></tr>
+                <tr align="center">
+                    <td>
+                        <input type="text" id="answer" value="" class="field">
+                    </td>
+                </tr>
+            </table>
+            <div class="btn-group">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="answer_submit" data-bs-toggle="dropdown" aria-expanded="false">
+                    submit
+                </button>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="#">without anything</a></li>
+                  <li><a class="dropdown-item" href="#">With increasing card rating</a></li>
+                  <li><a class="dropdown-item" href="#">With a reduction in card rating</a></li>
+                </ul>
+            </div>
+        </div>
+        <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                    {% for image in data["paths"] %}
+                        <div class="carousel-item {% if loop.first %}active{% endif %}" data-bs-interval="{% if loop.first %}5000{% else %}2000{% endif %}">
+                            <img src="{{ url_for('static', filename='cards/' + image) }}" class="d-block" height="600px" alt="Image {{ loop.index }}">
+                        </div>
+                    {% endfor %}
                 </div>
-            {% endfor %}
-        </p>
-        <p>{{ form.submit_btn(type="submit", class="btn btn-primary") }}</p>
-        <div>{{ message }}</div>
-    </form>
+                {% if data["paths"] %}
+                 <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
+                     <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                     <span class="visually-hidden">Previous</span>
+                 </button>
+                 <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">
+                     <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                     <span class="visually-hidden">Next</span>
+                 </button>
+                {% endif %}
+             </div>
+        {% endif %}
+    </div>
+    <div>
+        <h3>{{ found_card }}</h3>
+    </div>
+    <script>
+        const list = document.querySelector('ul');
+
+        list.addEventListener('click', (event) => {
+            var answer = document.getElementById("answer");
+            fetch("http://127.0.0.1:8080/game", {
+              method: "POST",
+              body: JSON.stringify({
+                answer: answer.value,
+                card_id: {{ data["card_id"] }},
+                text: event.target.innerHTML,
+              }),
+              headers: {
+                "Content-type": "application/json; charset=UTF-8"
+              }
+            })
+        });
+    </script>
 {% endblock %}

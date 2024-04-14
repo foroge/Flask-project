@@ -1,10 +1,12 @@
 from datetime import datetime
 import os
 import sys
+import json
 
 from flask import Flask, render_template, redirect, Response, request, make_response, jsonify, url_for
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.utils import secure_filename
+from sqlalchemy.sql.expression import func
 
 from forms.user import RegisterForm, LoginForm
 from forms.card import CardForm
@@ -14,7 +16,10 @@ from data.user import User
 from data.cards import Card
 from data import db_session
 
-from extra_utilities import save, name_change, save_card, reload_card, load_card, get_duration
+from forms.user_func import save_user, load_user_form
+from forms.card_func import save, load_random_card, name_change, save_card, reload_card, load_card
+
+from extra_utilities import get_duration
 
 
 PATH = "\\".join(sys.argv[0].split("\\")[:-2])
@@ -29,8 +34,36 @@ login_manager.init_app(app)
 
 @app.route('/game', methods=["GET", 'POST'])
 def game():
-    ...
+    db_sess = db_session.create_session()
 
+    title = "Try to guess the card"
+
+    if request.method == "POST":
+        title = "You guessed wrong"
+
+        data = request.json
+        card = db_sess.get(Card, data["card_id"])
+        title_card = card.title
+        user = db_sess.get(User, current_user.get_id())
+        if data["answer"] == title_card:
+            if "increasing" in data["text"]:
+                card.rating += 0.1
+            elif "reduction" in data["text"]:
+                card.rating -= 0.1
+            user.rating_user += 0.1
+            title = "You guessed!"
+        else:
+            user.rating_user -= 0.1
+
+        db_sess.commit()
+        db_sess.close()
+
+    card = load_random_card()
+    found_card = "No cards found"
+    if card:
+        found_card = "Cards found!"
+        return render_template("game.html", data=card, found_card=found_card, title=title)
+    return render_template("game.html", found_card=found_card, title=title)
 
 
 @app.route('/delete_card/<int:card_id>', methods=["GET", 'POST'])
@@ -92,7 +125,7 @@ def logout():
 def index():
     form = StartGameForm()
     if form.is_submitted():
-        redirect("/game/")
+        return redirect(f"/game/{form.question.data}")
     return render_template("index.html", form=form)
 
 
@@ -106,12 +139,9 @@ def user_data() -> str:
     user_dict = user.__dict__
     cards: list = user.cards
 
-    date = getattr(user, "create_date")
+    date = user.create_date
     cur_date = datetime.now()
     user_dict["create_date"] = get_duration(date, cur_date)
-
-    user_dict["rating_cards"] = user.rating_cards
-    user_dict["rating_whole"] = user.rating_whole
 
     db_sess.close()
 
@@ -130,53 +160,22 @@ def rating(sort='rating_whole'):
         rating = 'rating_user'
     else:
         users = db_sess.query(User).order_by(User.rating_whole.desc()).limit(10).all()
-        rating = 'rating_whole'
+        rating: str = 'rating_whole'
     for user in users:
         user.update()
-    users = [dict(login=user.login, rating=getattr(user, rating)) for user in users]
+    users = [dict(login=user.login, rating=round(getattr(user, rating), 2)) for user in users]
     return render_template('rating.html', top_users=users)
 
 
 @app.route('/edit_user/<int:user_id>', methods=['GET', 'POST'])
 def edit_user(user_id: int) -> str | Response:
     form = RegisterForm()
-    db_sess = db_session.create_session()
-    cur_user_id = int(current_user.get_id())
-    if request.method == "GET" and (cur_user_id == 1 or cur_user_id == user_id):
-        user = db_sess.get(User, user_id)
-        form.email.data = user.email
-        form.login.data = user.login
-        form.age.data = user.age
-        return render_template('register.html', title='Регистрация', form=form)
+
+    if request.method == "GET":
+        load_user_form(form, user_id)
 
     if form.validate_on_submit():
-        try:
-            age = int(form.age.data)
-        except ValueError:
-            return render_template('register.html', title='Регистрация',
-                                   form=form,
-                                   message="Возраст не является числом")
-        if not (0 <= age <= 130):
-            return render_template('register.html', title='Регистрация',
-                                   form=form,
-                                   message="Возраст не является реальным")
-        if form.password.data != form.password_again.data:
-            return render_template('register.html', title='Регистрация',
-                                   form=form,
-                                   message="Пароли не совпадают")
-
-        if db_sess.query(User).filter(User.email == form.email.data).first():
-            return render_template('register.html', title='Регистрация',
-                                   form=form,
-                                   message="Такой пользователь уже есть")
-        user = db_sess.get(User, user_id)
-        user.email = form.email.data
-        user.set_password(form.password.data)
-        user.login = form.login.data
-        user.age = form.age.data
-        db_sess.commit()
-        db_sess.close()
-        return redirect('/login')
+        return save_user(form, mode="edit", user_id=user_id)
     return render_template('register.html', title='Регистрация', form=form)
 
 
@@ -199,35 +198,7 @@ def login():
 def reqister():
     form = RegisterForm()
     if form.validate_on_submit():
-        try:
-            age = int(form.age.data)
-        except ValueError:
-            return render_template('register.html', title='Регистрация',
-                                   form=form,
-                                   message="Возраст не является числом")
-        if not (0 <= age <= 130):
-            return render_template('register.html', title='Регистрация',
-                                   form=form,
-                                   message="Возраст не является реальным")
-        if form.password.data != form.password_again.data:
-            return render_template('register.html', title='Регистрация',
-                                   form=form,
-                                   message="Пароли не совпадают")
-        db_sess = db_session.create_session()
-        if db_sess.query(User).filter(User.email == form.email.data).first():
-            return render_template('register.html', title='Регистрация',
-                                   form=form,
-                                   message="Такой пользователь уже есть")
-        user = User()
-        user.email = form.email.data
-        user.set_password(form.password.data)
-        user.login = form.login.data
-        user.age = form.age.data
-
-        db_sess.add(user)
-        db_sess.commit()
-        db_sess.close()
-        return redirect('/login')
+        return save_user(form)
     return render_template('register.html', title='Регистрация', form=form)
 
 
