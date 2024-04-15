@@ -5,6 +5,8 @@ import json
 
 from flask import Flask, render_template, redirect, Response, request, make_response, jsonify, url_for
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
+from flask_restful import reqparse, abort, Api, Resource
+
 from werkzeug.utils import secure_filename
 from sqlalchemy.sql.expression import func
 
@@ -14,22 +16,36 @@ from forms.game_characteristic import StartGameForm
 
 from data.user import User
 from data.cards import Card
-from data import db_session
+from data import db_session, user_resources
 
 from forms.user_func import save_user, load_user_form
 from forms.card_func import save, load_random_card, name_change, save_card, reload_card, load_card
 
 from extra_utilities import get_duration
 
-
 PATH = "\\".join(sys.argv[0].split("\\")[:-2])
 
 path_templates = os.path.join(PATH, "templates")
+
+from data import user_api
+
 path_static = os.path.join(PATH, "data")
+
 app = Flask(__name__, template_folder=path_templates, static_folder=path_static)
+api = Api(app)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 login_manager = LoginManager()
 login_manager.init_app(app)
+
+
+@app.errorhandler(404)
+def not_found(_):
+    return make_response(jsonify({'error': 'Not found'}), 404)
+
+
+@app.errorhandler(400)
+def bad_request(_):
+    return make_response(jsonify({'error': 'Bad Request'}), 400)
 
 
 @app.route('/game', methods=["GET", 'POST'])
@@ -154,16 +170,16 @@ def rating(sort='rating_whole'):
     users: list
     if sort == 'rating_cards':
         users = db_sess.query(User).order_by(User.rating_cards.desc()).limit(10).all()
-        rating = 'rating_cards'
+        rating_name = 'rating_cards'
     elif sort == 'rating_user':
         users = db_sess.query(User).order_by(User.rating_user.desc()).limit(10).all()
-        rating = 'rating_user'
+        rating_name = 'rating_user'
     else:
         users = db_sess.query(User).order_by(User.rating_whole.desc()).limit(10).all()
-        rating: str = 'rating_whole'
+        rating_name: str = 'rating_whole'
     for user in users:
         user.update()
-    users = [dict(login=user.login, rating=round(getattr(user, rating), 2)) for user in users]
+    users = [dict(login=user.login, rating=round(getattr(user, rating_name), 2)) for user in users]
     return render_template('rating.html', top_users=users)
 
 
@@ -205,6 +221,12 @@ def reqister():
 def main():
     path_db = os.path.join(PATH, "db/user.db")
     db_session.global_init(path_db)
+
+    app.register_blueprint(user_api.blueprint)
+
+    api.add_resource(user_resources.UserListResource, '/api_restful/users')
+    api.add_resource(user_resources.UserResource, '/api_restful/users/<int:users_id>')
+
     app.run(port=8080, host='127.0.0.1')
 
 

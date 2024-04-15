@@ -1,7 +1,11 @@
+import sys
+
 from flask import render_template, url_for, redirect, Response
 
 from data.user import User
-from src.forms.user import RegisterForm, LoginForm
+
+sys.path.append("\\".join(sys.argv[0].split("\\")[:-1]))
+from .user import RegisterForm, LoginForm
 
 
 def register_form_check(form: RegisterForm, mode: str, user_id: int) -> str | None:
