@@ -45,13 +45,16 @@ def load_random_card() -> dict[str, str, list, int, int]:
     db_sess = db_session.create_session()
 
     user = db_sess.get(User, current_user.get_id())
-    card = db_sess.query(Card).filter(Card.id not in user.complited_cards).order_by(func.random()).first()
+
+    card = (db_sess.query(Card).filter(Card not in user.complited_cards).filter(Card.user_id != user.id)
+            .order_by(func.random()).first())
+    print(card in user.complited_cards)
     if card:
         from main import PATH
         path_cards = f"data\\cards\\cards_{card.id}"
         path_images = os.path.join(PATH, path_cards)
         paths = [f"cards_{card.id}/{path}" for path in os.listdir(os.path.join(PATH, path_images))]
-        data = dict(title=card.title, promt=card.promt, paths=paths, rating=card.rating, card_id=card.id)
+        data = dict(promt=card.promt, paths=paths, rating=round(card.rating, 2), card_id=card.id)
         return data
 
 

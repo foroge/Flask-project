@@ -27,3 +27,11 @@ class Card(SqlAlchemyBase, SerializerMixin):
     user = orm.relationship('User', foreign_keys=[user_id])
 
     finished_users = orm.relationship("User", secondary=ComplitedCard)
+
+
+class CurrentCard(SqlAlchemyBase, SerializerMixin):
+    __tablename__ = 'current_card'
+
+    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
+    card_id = sqlalchemy.Column(sqlalchemy.Integer)
+    user_id = sqlalchemy.Column(sqlalchemy.Integer)

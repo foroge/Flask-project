@@ -48,14 +48,14 @@ def create_users():
     elif not all(key in request.json for key in
                  ['login', 'age', "email", "hashed_password"]):
         return make_response(jsonify({'error': 'Bad request'}), 400)
-    elif 0 <= request.json['age'] <= 130:
+    elif not 0 <= int(request.json['age']) <= 130:
         return make_response(jsonify({'error': 'Bad request'}), 400)
 
     users = User()
     users.login = request.json['login']
     users.age = request.json['age']
     users.email = request.json['email']
-    users.hashed_password = request.json['hashed_password']
+    users.set_password(request.json['hashed_password'])
 
     db_sess = db_session.create_session()
     db_sess.add(users)
@@ -84,6 +84,9 @@ def edit_users(users_id):
     db_sess = db_session.create_session()
     user = db_sess.query(User).get(users_id)
     for key in request.json:
-        setattr(user, key, request.json[key])
+        if key != "hashed_password":
+            setattr(user, key, request.json[key])
+        else:
+            user.set_password(request.json[key])
     db_sess.commit()
     return jsonify({'id': user.id})

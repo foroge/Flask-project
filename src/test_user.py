@@ -5,7 +5,15 @@ import unittest
 class TestUserRestfulApiPost(unittest.TestCase):
     def test_correct(self):
         address = 'http://127.0.0.1:8080/api/users'
-        data = dict(login="Alex", age=19, email="email_test_60@yandex.ru", hashed_password="123")
+        data = dict(login="Alex", age=19, email="email_test_10@yandex.ru", hashed_password="123")
+
+        response = post(address, json=data)
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_correct_two(self):
+        address = 'http://127.0.0.1:8080/api/users'
+        data = dict(login="Oleg", age=19, email="email_test_11@yandex.ru", hashed_password="123")
 
         response = post(address, json=data)
 
@@ -13,7 +21,7 @@ class TestUserRestfulApiPost(unittest.TestCase):
 
     def test_email_not_enique(self):
         address = 'http://127.0.0.1:8080/api/users'
-        data = dict(login="Alex", age=19, email="email_test_60@yandex.ru", hashed_password="123")
+        data = dict(login="Alex", age=19, email="email_test_10@yandex.ru", hashed_password="123")
 
         response = post(address, json=data)
 
@@ -21,7 +29,7 @@ class TestUserRestfulApiPost(unittest.TestCase):
 
     def test_not_full_param(self):
         address = 'http://127.0.0.1:8080/api/users'
-        data = dict(login="Alex", email="email_test_61@yandex.ru", hashed_password="123")
+        data = dict(login="Alex", email="email_test_12@yandex.ru", hashed_password="123")
 
         response = post(address, json=data)
 
@@ -38,7 +46,7 @@ class TestUserRestfulApiPost(unittest.TestCase):
 
 class TestUserRestfulApiGet(unittest.TestCase):
     def test_correct_one_user(self):
-        address = 'http://127.0.0.1:8080/api/users/2'
+        address = 'http://127.0.0.1:8080/api/users/1'
         response = get(address)
 
         self.assertEqual(response.status_code, 200)
@@ -64,15 +72,15 @@ class TestUserRestfulApiGet(unittest.TestCase):
 
 class TestUserRestfulApiPut(unittest.TestCase):
     def test_correct(self):
-        address = 'http://127.0.0.1:8080/api/users/6'
-        data = dict(login="Alex_two", age=21, email="email_test_10@yandex.ru")
+        address = 'http://127.0.0.1:8080/api/users/1'
+        data = dict(login="Alex_two", age=21, email="email_test_3@yandex.ru")
 
         response = put(address, json=data)
 
         self.assertEqual(response.status_code, 200)
 
     def test_non_existent_param(self):
-        address = 'http://127.0.0.1:8080/api/users/4'
+        address = 'http://127.0.0.1:8080/api/users/1'
         data = dict(loggggin="Alex_two")
 
         response = put(address, json=data)
@@ -98,7 +106,7 @@ class TestUserRestfulApiPut(unittest.TestCase):
 
 class TestUserRestfulApiDelete(unittest.TestCase):
     def test_correct(self):
-        address = 'http://127.0.0.1:8080/api/users/9'
+        address = 'http://127.0.0.1:8080/api/users/3'
 
         response = delete(address)
 

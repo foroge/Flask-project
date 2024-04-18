@@ -7,6 +7,9 @@
 .content-center {
     text-align: center;
 }
+.nav-center {
+    display:float;
+}
 .border-none {
   border-collapse: collapse;
   border: none;
@@ -20,4 +23,7 @@
 }
 .card {
     display: block;
+}
+.margin-top {
+    margin-top: 3rem;
 }

@@ -35,8 +35,8 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
         return check_password_hash(self.hashed_password, password)
 
     def update(self) -> None:
-        self.rating_cards = sum([card.rating for card in self.cards])
+        self.rating_cards = round(sum([card.rating for card in self.cards]), 2)
         if self.cards:
-            self.rating_whole = sum([card.rating for card in self.cards]) + self.rating_user
+            self.rating_whole = round(sum([card.rating for card in self.cards]) + self.rating_user, 3)
         else:
             self.rating_whole = self.rating_user

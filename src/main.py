@@ -12,7 +12,9 @@ from sqlalchemy.sql.expression import func
 
 from forms.user import RegisterForm, LoginForm
 from forms.card import CardForm
+from forms.game import GameForm
 from forms.game_characteristic import StartGameForm
+from forms.answer_sumbit import AnswerForm
 
 from data.user import User
 from data.cards import Card
@@ -20,6 +22,7 @@ from data import db_session, user_resources
 
 from forms.user_func import save_user, load_user_form
 from forms.card_func import save, load_random_card, name_change, save_card, reload_card, load_card
+from forms.game_func import load_game, reload_game
 
 from extra_utilities import get_duration
 
@@ -48,38 +51,24 @@ def bad_request(_):
     return make_response(jsonify({'error': 'Bad Request'}), 400)
 
 
+@app.route('/answer/<string:title>', methods=["GET", 'POST'])
+def answer(title):
+    form = AnswerForm()
+    if request.method == "GET":
+        title = f"The correct answer is '{title}'" if title != "False" else "You guessed"
+        return render_template("answer.html", title=title, form=form)
+    if form.validate_on_submit():
+        return redirect("/game")
+
+
 @app.route('/game', methods=["GET", 'POST'])
 def game():
-    db_sess = db_session.create_session()
-
-    title = "Try to guess the card"
-
-    if request.method == "POST":
-        title = "You guessed wrong"
-
-        data = request.json
-        card = db_sess.get(Card, data["card_id"])
-        title_card = card.title
-        user = db_sess.get(User, current_user.get_id())
-        if data["answer"] == title_card:
-            if "increasing" in data["text"]:
-                card.rating += 0.1
-            elif "reduction" in data["text"]:
-                card.rating -= 0.1
-            user.rating_user += 0.1
-            title = "You guessed!"
-        else:
-            user.rating_user -= 0.1
-
-        db_sess.commit()
-        db_sess.close()
-
-    card = load_random_card()
-    found_card = "No cards found"
-    if card:
-        found_card = "Cards found!"
-        return render_template("game.html", data=card, found_card=found_card, title=title)
-    return render_template("game.html", found_card=found_card, title=title)
+    form = GameForm()
+    if request.method == "GET":
+        return load_game(form)
+    if form.is_submitted():
+        return reload_game(form)
+    return load_game(form)
 
 
 @app.route('/delete_card/<int:card_id>', methods=["GET", 'POST'])
@@ -141,7 +130,7 @@ def logout():
 def index():
     form = StartGameForm()
     if form.is_submitted():
-        return redirect(f"/game/{form.question.data}")
+        return redirect(f"/game")
     return render_template("index.html", form=form)
 
 
@@ -164,6 +153,7 @@ def user_data() -> str:
     return render_template("user_data.html", user=user_dict, cards=cards)
 
 
+@app.route('/rating', methods=['GET', 'POST'])
 @app.route('/rating/<sort>', methods=['GET', 'POST'])
 def rating(sort='rating_whole'):
     db_sess = db_session.create_session()
@@ -179,7 +169,9 @@ def rating(sort='rating_whole'):
         rating_name: str = 'rating_whole'
     for user in users:
         user.update()
+        db_sess.commit()
     users = [dict(login=user.login, rating=round(getattr(user, rating_name), 2)) for user in users]
+    db_sess.close()
     return render_template('rating.html', top_users=users)
 
 
