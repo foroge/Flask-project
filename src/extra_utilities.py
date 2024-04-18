@@ -41,6 +41,3 @@ def get_duration(then: datetime, now=datetime.now()) -> str:
         return (f"{int(y[0])} years, {int(d[0])} days, {int(h[0])} hours, "
                 f"{int(m[0])} minutes and {int(s[0])} seconds")
     return total_duration()
-
-
-

@@ -111,7 +111,7 @@ def create_card() -> Response | str:
 
 
 @login_manager.user_loader
-def load_user(user_id: int) -> User:
+def load_user(user_id: int):
     db_sess = db_session.create_session()
     user = db_sess.get(User, user_id)
     db_sess.close()

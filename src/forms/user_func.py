@@ -3,6 +3,7 @@ import sys
 from flask import render_template, url_for, redirect, Response
 
 from data.user import User
+from werkzeug import Response
 
 sys.path.append("\\".join(sys.argv[0].split("\\")[:-1]))
 from .user import RegisterForm, LoginForm
@@ -38,7 +39,7 @@ def register_form_check(form: RegisterForm, mode: str, user_id: int) -> str | No
     db_sess.close()
 
 
-def save_user(form: RegisterForm, mode="register", user_id=None) -> Response:
+def save_user(form: RegisterForm, mode="register", user_id=None) -> str | Response:
     check = register_form_check(form, mode, user_id)
     if check:
         return check
@@ -46,8 +47,6 @@ def save_user(form: RegisterForm, mode="register", user_id=None) -> Response:
     from main import db_session
 
     db_sess = db_session.create_session()
-
-    print(user_id, db_sess.get(User, user_id))
 
     user = User() if mode == "register" else db_sess.get(User, user_id)
     user.email = form.email.data
@@ -62,8 +61,7 @@ def save_user(form: RegisterForm, mode="register", user_id=None) -> Response:
 
 
 def load_user_form(form: RegisterForm, user_id: int) -> str:
-    from main import db_session
-    from main import current_user
+    from main import db_session, current_user
 
     db_sess = db_session.create_session()
     cur_user_id = int(current_user.get_id())

@@ -12,9 +12,7 @@ from .card_func import load_random_card
 
 
 def load_game(form) -> str:
-    from main import PATH
-    from main import db_session
-    from main import current_user
+    from main import PATH, current_user, db_session
 
     card = load_random_card()
 
@@ -39,9 +37,7 @@ def load_game(form) -> str:
 
 
 def reload_game(form) -> Response | str:
-    from main import PATH
-    from main import db_session
-    from main import current_user
+    from main import PATH, db_session, current_user
 
     db_sess = db_session.create_session()
 

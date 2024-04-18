@@ -39,14 +39,13 @@ def delete_images(folder_path: str) -> None:
 
 
 def load_random_card() -> dict[str, str, list, int, int]:
-    from main import current_user
-    from main import db_session
+    from main import current_user, db_session
 
     db_sess = db_session.create_session()
 
     user = db_sess.get(User, current_user.get_id())
 
-    card = (db_sess.query(Card).filter(Card not in user.complited_cards).filter(Card.user_id != user.id)
+    card = (db_sess.query(Card).filter(Card not in user.complited_cards)
             .order_by(func.random()).first())
     print(card in user.complited_cards)
     if card:
@@ -59,9 +58,7 @@ def load_random_card() -> dict[str, str, list, int, int]:
 
 
 def save_card(form: SqlAlchemyBase, mode: str, card_id=None) -> Response:
-    from main import PATH
-    from main import db_session
-    from main import current_user
+    from main import PATH, current_user, db_session
 
     db_sess = db_session.create_session()
 
@@ -107,8 +104,7 @@ def reload_card(form, name: str, title: str) -> str:
 
 
 def load_card(form, name: str, title: str, card_id: int) -> str:
-    from main import PATH
-    from main import db_session
+    from main import PATH, db_session
 
     db_sess = db_session.create_session()
 
